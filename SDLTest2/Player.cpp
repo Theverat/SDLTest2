@@ -69,7 +69,6 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
     }
 }
 
-
 void Player::maybeFire(Scene& scene, float elapsed)
 {
     if (!firing || (elapsed - lastFireTime) < FIRE_INTERVAL) {

@@ -2,10 +2,10 @@
 
 Scene::Scene()
 {
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 30; ++i) {
         Enemy enemy{};
-        enemy.setPos({ SDL_randf() * 2000.f, SDL_randf() * 2000.f, 0.0f });
-        enemy.setColor({ 1.0f, 0.0f, 0.0f, 1.f });
+        enemy.setPos({ SDL_randf() * bounds.w, SDL_randf() * bounds.h, 0.0f });
+        enemy.setColor({ SDL_randf() * 0.5f + 0.5f, 0.0f, 0.0f, 1.f });
         enemies.push_back(enemy);
     }
 
@@ -61,4 +61,19 @@ void Scene::update(float dt, float elapsed)
         [](const Projectile& proj) {
             return !proj.isAlive();
         }), projectiles.end());
+}
+
+void Scene::draw(SDL_Renderer* renderer, float elapsed)
+{
+    // Draw ground
+    SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
+    SDL_RenderFillRect(renderer, &bounds);
+
+    player.draw(renderer);
+    for (auto& obj : enemies) {
+        obj.draw(renderer);
+    }
+    for (auto& proj : projectiles) {
+        proj.draw(renderer);
+    }
 }

@@ -26,24 +26,15 @@ public:
     }
 
     void update(float dt, float elapsed);
-
-    void draw(SDL_Renderer* renderer, float elapsed) {
-        player.draw(renderer);
-        for (auto& obj : enemies) {
-            obj.draw(renderer);
-        }
-        for (auto& proj : projectiles) {
-            proj.draw(renderer);
-        }
-    }
+    void draw(SDL_Renderer* renderer, float elapsed);
 
     void addProjectile(const Projectile& projectile) {
         projectiles.push_back(projectile);
     }
 
 private:
+    SDL_FRect bounds{ 0, 0, 1920, 1080 };
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
     Player player{};
 };
-
