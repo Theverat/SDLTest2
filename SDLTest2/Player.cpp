@@ -20,30 +20,22 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                DirectX::XMFLOAT3 speed = getSpeed();
-                speed.x = axisValue * MOVE_SPEED;
-                setSpeed(speed);
+                setSpeed(XMVectorSetX(getSpeed(), axisValue * MOVE_SPEED));
             }
             else
             {
-                DirectX::XMFLOAT3 speed = getSpeed();
-                speed.x = 0.0f;
-                setSpeed(speed);
+                setSpeed(XMVectorSetX(getSpeed(), 0.0f));
             }
         }
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                DirectX::XMFLOAT3 speed = getSpeed();
-                speed.y = axisValue * MOVE_SPEED;
-                setSpeed(speed);
+                setSpeed(XMVectorSetY(getSpeed(), axisValue * MOVE_SPEED));
             }
             else
             {
-                DirectX::XMFLOAT3 speed = getSpeed();
-                speed.y = 0.0f;
-                setSpeed(speed);
+                setSpeed(XMVectorSetY(getSpeed(), 0.0f));
             }
         }
         // Right stick - Direction
@@ -51,30 +43,22 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                DirectX::XMFLOAT3 dir = getAimDir();
-                dir.x = axisValue;
-                setAimDir(dir);
+                setAimDir(XMVectorSetX(getAimDir(), axisValue));
             }
             else
             {
-                DirectX::XMFLOAT3 dir = getAimDir();
-                dir.x = 0.0f;
-                setAimDir(dir);
+                setAimDir(XMVectorSetX(getAimDir(), 0.0f));
             }
         }
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                DirectX::XMFLOAT3 dir = getAimDir();
-                dir.y = axisValue;
-                setAimDir(dir);
+                setAimDir(XMVectorSetY(getAimDir(), axisValue));
             }
             else
             {
-                DirectX::XMFLOAT3 dir = getAimDir();
-                dir.y = 0.0f;
-                setAimDir(dir);
+                setAimDir(XMVectorSetY(getAimDir(), 0.0f));
             }
         }
     }
@@ -91,8 +75,6 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
 
 void Player::fire(Scene& scene)
 {
-    XMVECTOR pos = getPosV();
-
     Projectile proj{};
     proj.setPos(getPos());
 }

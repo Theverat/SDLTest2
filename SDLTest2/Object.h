@@ -3,70 +3,55 @@
 #include <DirectXMath.h>
 #include <SDL3/SDL.h>
 
+#include "Utils.h"
+
 class Object
 {
 public:
-    void setPos(DirectX::XMFLOAT3 p)
+    void setPos(DirectX::XMVECTOR p)
     {
-        pos = DirectX::XMLoadFloat3(&p);
+        pos = p;
     }
 
-    DirectX::XMFLOAT3 getPos() const
-    {
-        DirectX::XMFLOAT3 p;
-        DirectX::XMStoreFloat3(&p, pos);
-        return p;
-    }
-
-    DirectX::XMVECTOR getPosV() const
+    DirectX::XMVECTOR getPos() const
     {
         return pos;
     }
 
-    void setSpeed(DirectX::XMFLOAT3 s)
+    void setSpeed(DirectX::XMVECTOR s)
     {
-        speed = DirectX::XMLoadFloat3(&s);
+        speed = s;
     }
 
-    DirectX::XMFLOAT3 getSpeed() const
+    DirectX::XMVECTOR getSpeed() const
     {
-        DirectX::XMFLOAT3 s;
-        DirectX::XMStoreFloat3(&s, speed);
-        return s;
+        return speed;
     }
 
-    void setColor(DirectX::XMFLOAT4 c)
+    void setColor(DirectX::XMVECTOR c)
     {
-        color = c;
+        DirectX::XMStoreFloat4(&color, c);
     }
 
-    DirectX::XMFLOAT4 getColor() const
+    DirectX::XMVECTOR getColor() const
     {
-        return color;
+        return DirectX::XMLoadFloat4(&color);
     }
 
-    void setAimDir(DirectX::XMFLOAT3 d)
+    void setAimDir(DirectX::XMVECTOR d)
     {
-        aimDir = DirectX::XMLoadFloat3(&d);
+        aimDir = d;
     }
 
-    DirectX::XMFLOAT3 getAimDir() const
+    DirectX::XMVECTOR getAimDir() const
     {
-        DirectX::XMFLOAT3 d;
-        DirectX::XMStoreFloat3(&d, aimDir);
-        return d;
+        return aimDir;
     }
 
     void update(float dt)
     {
         using namespace DirectX;
-
-        XMFLOAT3 speed2;
-        XMStoreFloat3(&speed2, speed);
-        //if (speed2.x != 0 || speed2.y != 0)
-        //    __debugbreak();
-
-        pos += speed * dt;
+        pos = XMVectorMultiplyAdd(speed, XMVectorReplicate(dt), pos);
     }
 
     void draw(SDL_Renderer* renderer) {
@@ -74,22 +59,23 @@ public:
 
         // Body
         SDL_SetRenderDrawColor(renderer,
-            color.x * 255.f,
-            color.y * 255.f,
-            color.z * 255.f,
-            color.w * 255.f);
+            Uint8(color.x * 255.f),
+            Uint8(color.y * 255.f),
+            Uint8(color.z * 255.f),
+            Uint8(color.w * 255.f));
 
-        const XMFLOAT3 p = getPos();
+        const XMFLOAT3 p = toFloat3(getPos());
         const float size = 20.f;
         SDL_FRect rect{ p.x - size * 0.5f, p.y - size * 0.5f, size, size };
         SDL_RenderFillRect(renderer, &rect);
 
         // Aim direction
+        const XMFLOAT3 aimDirFloat = toFloat3(getAimDir());
         SDL_RenderLine(renderer,
-            static_cast<int>(p.x),
-            static_cast<int>(p.y),
-            static_cast<int>(p.x + getAimDir().x * 30),
-            static_cast<int>(p.y + getAimDir().y * 30));
+            p.x,
+            p.y,
+            p.x + aimDirFloat.x * 30,
+            p.y + aimDirFloat.y * 30);
     }
 
 private:
