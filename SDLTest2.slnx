@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="SDLTest2/SDLTest2.vcxproj" />
+  <Project Path="SDLTest2/SDLTest2.vcxproj" Id="b5b1b738-e624-4595-9d7c-617f47f3d933" />
 </Solution>

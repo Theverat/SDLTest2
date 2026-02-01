@@ -26,7 +26,8 @@ public:
     }
 
     void update(float dt, float elapsed);
-    void draw(SDL_Renderer* renderer, float elapsed);
+    void draw(SDL_Renderer* renderer, float elapsed,
+        int width, int height, float uiScale);
 
     void addProjectile(const Projectile& projectile) {
         projectiles.push_back(projectile);

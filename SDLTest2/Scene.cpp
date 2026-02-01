@@ -63,11 +63,35 @@ void Scene::update(float dt, float elapsed)
         }), projectiles.end());
 }
 
-void Scene::draw(SDL_Renderer* renderer, float elapsed)
+void Scene::draw(SDL_Renderer* renderer, float elapsed,
+    int width, int height, float uiScale)
 {
+    // Scale size of scene and everything in it to fit the window.
+    const float windowAspect = float(width) / float(height);
+    const float boundsAspect = bounds.w / bounds.h;
+
+    SDL_FRect scaledBounds{};
+
+    if (windowAspect > boundsAspect) {
+        // Window is wider than bounds - letterbox with black bars on left/right
+        scaledBounds.h = float(height);
+        scaledBounds.w = scaledBounds.h * boundsAspect;
+        scaledBounds.x = (float(width) - scaledBounds.w) * 0.5f;
+        scaledBounds.y = 0.0f;
+    }
+    else {
+        // Window is taller than bounds - pillarbox with black bars on top/bottom
+        scaledBounds.w = float(width);
+        scaledBounds.h = scaledBounds.w / boundsAspect;
+        scaledBounds.x = 0.0f;
+        scaledBounds.y = (float(height) - scaledBounds.h) * 0.5f;
+    }
+
+    // TODO do the same for other sprites/objects?
+
     // Draw ground
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-    SDL_RenderFillRect(renderer, &bounds);
+    SDL_RenderFillRect(renderer, &scaledBounds);
 
     player.draw(renderer);
     for (auto& obj : enemies) {

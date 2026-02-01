@@ -14,17 +14,26 @@ static Scene* scene = nullptr;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("SDL Hello World Example", "1.0", "com.example.sdl-hello-world");
+    SDL_SetAppMetadata("SDL Test2", "1.0", "com.example.sdl-test2");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    if (!SDL_CreateWindowAndRenderer("Hello SDL", 2000, 2000, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("Hello SDL", 2200, 1200,
+        SDL_WINDOW_RESIZABLE, &window, &renderer))
+    {
         SDL_Log("SDL_CreateWindowAndRenderer() failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+
+    int width{}, height{};
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+    SDL_Log("Window size: %dx%d", width, height);
+    const SDL_DisplayID displayID = SDL_GetDisplayForWindow(window);
+    const float displayScale = SDL_GetDisplayContentScale(displayID);
+    SDL_Log("Display scale: %.2f", displayScale);
 
     // Init game objects
     scene = new Scene();
@@ -66,8 +75,13 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     const float dt = (now - last) / float(SDL_GetPerformanceFrequency());
     const float elapsed = now / float(SDL_GetPerformanceFrequency());
 
+    int width{}, height{};
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+    const SDL_DisplayID displayID = SDL_GetDisplayForWindow(window);
+    const float uiScale = SDL_GetDisplayContentScale(displayID);
+
     scene->update(dt, elapsed);
-    scene->draw(renderer, elapsed);
+    scene->draw(renderer, elapsed, width, height, uiScale);
 
     SDL_RenderPresent(renderer);
 
@@ -79,7 +93,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     switch (event->type) {
-    case SDL_EVENT_QUIT:  /* triggers on last window close and other things. End the program. */
+    case SDL_EVENT_QUIT:
         return SDL_APP_SUCCESS;
 
     case SDL_EVENT_KEY_DOWN:  /* quit if user hits ESC key */
