@@ -64,23 +64,26 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         // Right trigger - Fire
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)
         {
-            if (axisValue > 0.5f) // Threshold to consider as pressed
-            {
-                fire(scene);
-            }
+            firing = (axisValue > 0.5f);
         }
     }
 }
 
-void Player::fire(Scene& scene)
+
+void Player::maybeFire(Scene& scene, float elapsed)
 {
-    //SDL_Log("firing");
+    if (!firing || (elapsed - lastFireTime) < FIRE_INTERVAL) {
+        return;
+    }
+
+    lastFireTime = elapsed;
     const XMVECTOR aimDir = XMVector3Normalize(getAimDir());
 
     Projectile proj{};
     proj.setPos(getPos() + aimDir * 20.f);
     proj.setSpeed(aimDir * 100.f);
     proj.setColor(toVec(1.0f, 1.0f, 0.0f, 1.0f));
+    proj.setRadius(15.f);
 
     scene.addProjectile(proj);
 }

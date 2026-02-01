@@ -55,7 +55,7 @@ public:
         return aimDir;
     }
 
-    void update(float dt)
+    void update(float dt, float elapsed)
     {
         using namespace DirectX;
         pos = XMVectorMultiplyAdd(speed, XMVectorReplicate(dt), pos);
@@ -71,9 +71,11 @@ public:
             Uint8(color.z * 255.f),
             Uint8(color.w * 255.f));
 
+        // TODO make resolution independent
         const XMFLOAT3 p = toFloat3(getPos());
-        const float size = 20.f;
-        SDL_FRect rect{ p.x - size * 0.5f, p.y - size * 0.5f, size, size };
+        SDL_FRect rect{ p.x - radius * 0.5f,
+                        p.y - radius * 0.5f,
+                        radius, radius };
         SDL_RenderFillRect(renderer, &rect);
 
         // Aim direction
@@ -97,17 +99,20 @@ public:
         return health > 0;
     }
 
+    void setRadius(float r) {
+        radius = r;
+    }
+
     float getRadius() const {
         return radius;
     }
-
 
 private:
     DirectX::XMVECTOR pos{};
     DirectX::XMVECTOR speed{};
     DirectX::XMVECTOR aimDir{};
     DirectX::XMFLOAT4 color{};
-    float radius{ 10.f };
+    float radius{ 30.f };
 
     int health{ 100 };
 };

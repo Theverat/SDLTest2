@@ -60,9 +60,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     static Uint64 last = 0;
     const Uint64 now = SDL_GetPerformanceCounter();
     const float dt = (now - last) / float(SDL_GetPerformanceFrequency());
+    const float elapsed = now / float(SDL_GetPerformanceFrequency());
 
-    scene->update(dt);
-    scene->draw(renderer);
+    scene->update(dt, elapsed);
+    scene->draw(renderer, elapsed);
 
     SDL_RenderPresent(renderer);
 
