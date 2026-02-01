@@ -8,6 +8,13 @@
 class Object
 {
 public:
+    Object() = default;
+    virtual ~Object() = default;
+    Object(const Object&) = default;
+    Object& operator=(const Object&) = default;
+    Object(Object&&) noexcept = default;
+    Object& operator=(Object&&) noexcept = default;
+
     void setPos(DirectX::XMVECTOR p)
     {
         pos = p;
@@ -78,11 +85,29 @@ public:
             p.y + aimDirFloat.y * 30);
     }
 
+    void setHealth(int h) {
+        health = h;
+    }
+
+    int getHealth() const {
+        return health;
+    }
+
+    bool isAlive() const {
+        return health > 0;
+    }
+
+    float getRadius() const {
+        return radius;
+    }
+
+
 private:
     DirectX::XMVECTOR pos{};
     DirectX::XMVECTOR speed{};
     DirectX::XMVECTOR aimDir{};
     DirectX::XMFLOAT4 color{};
+    float radius{ 10.f };
 
     int health{ 100 };
 };

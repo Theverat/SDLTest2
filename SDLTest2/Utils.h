@@ -2,6 +2,11 @@
 
 #include <DirectXMath.h>
 
+inline DirectX::XMVECTOR toVec(float x)
+{
+    return DirectX::XMVectorReplicate(x);
+}
+
 inline DirectX::XMVECTOR toVec(float x, float y)
 {
     return DirectX::XMVectorSet(x, y, 0.0f, 0.0f);

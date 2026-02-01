@@ -61,20 +61,26 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
                 setAimDir(XMVectorSetY(getAimDir(), 0.0f));
             }
         }
-    }
-    // Handle gamepad button presses
-    else if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN)
-    {
-        // X button (Cross on PlayStation) - Fire
-        if (event.gbutton.button == SDL_GAMEPAD_BUTTON_SOUTH)
+        // Right trigger - Fire
+        else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)
         {
-            fire(scene);
+            if (axisValue > 0.5f) // Threshold to consider as pressed
+            {
+                fire(scene);
+            }
         }
     }
 }
 
 void Player::fire(Scene& scene)
 {
+    //SDL_Log("firing");
+    const XMVECTOR aimDir = XMVector3Normalize(getAimDir());
+
     Projectile proj{};
-    proj.setPos(getPos());
+    proj.setPos(getPos() + aimDir * 20.f);
+    proj.setSpeed(aimDir * 100.f);
+    proj.setColor(toVec(1.0f, 1.0f, 0.0f, 1.0f));
+
+    scene.addProjectile(proj);
 }

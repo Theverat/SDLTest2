@@ -9,8 +9,6 @@ static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
 static SDL_Gamepad* gamepad = nullptr;
 
-static SDL_FRect mouseposrect;
-
 // Game objects
 static Scene* scene = nullptr;
 
@@ -27,9 +25,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("SDL_CreateWindowAndRenderer() failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-
-    mouseposrect.x = mouseposrect.y = -1000;  /* -1000 so it's offscreen at start */
-    mouseposrect.w = mouseposrect.h = 50;
 
     // Init game objects
     scene = new Scene();
@@ -88,10 +83,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         }
         break;
 
-    case SDL_EVENT_MOUSE_MOTION:  /* keep track of the latest mouse position */
-        /* center the square where the mouse is */
-        mouseposrect.x = event->motion.x - (mouseposrect.w / 2);
-        mouseposrect.y = event->motion.y - (mouseposrect.h / 2);
+    case SDL_EVENT_MOUSE_MOTION:
         break;
     }
 
