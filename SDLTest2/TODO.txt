@@ -1,0 +1,1 @@
+- Change all files to UTF-8 and ensure all new files are created as UTF-8.

@@ -76,14 +76,19 @@ void Player::maybeFire(Scene& scene, float elapsed)
         return;
     }
 
-    lastFireTime = elapsed;
-    const XMVECTOR aimDir = XMVector3Normalize(getAimDir());
+    const XMVECTOR rawAimDir = getAimDir();
+    if (XMVector3Less(XMVector3LengthSq(rawAimDir), XMVectorZero())) {
+        return; // No aim direction
+    }
+
+    const XMVECTOR aimDir = XMVector3Normalize(rawAimDir);
 
     Projectile proj{};
     proj.setPos(getPos() + aimDir * 20.f);
-    proj.setSpeed(aimDir * 100.f);
+    proj.setSpeed(aimDir * 1000.f);
     proj.setColor(toVec(1.0f, 1.0f, 0.0f, 1.0f));
     proj.setRadius(15.f);
 
     scene.addProjectile(proj);
+    lastFireTime = elapsed;
 }
