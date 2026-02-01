@@ -77,7 +77,8 @@ void Player::maybeFire(Scene& scene, float elapsed)
     }
 
     const XMVECTOR rawAimDir = getAimDir();
-    if (XMVector3Less(XMVector3LengthSq(rawAimDir), XMVectorZero())) {
+    static const XMVECTOR minLen = XMVectorReplicate(0.1f);
+    if (XMVector3Less(XMVector3LengthSq(rawAimDir), minLen)) {
         return; // No aim direction
     }
 
