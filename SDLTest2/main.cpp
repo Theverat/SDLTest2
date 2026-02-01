@@ -7,6 +7,7 @@
 
 static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
+static SDL_Gamepad* gamepad = nullptr;
 
 static SDL_FRect mouseposrect;
 
@@ -17,8 +18,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
     SDL_SetAppMetadata("SDL Hello World Example", "1.0", "com.example.sdl-hello-world");
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+        SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
@@ -32,6 +33,26 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Init game objects
     scene = new Scene();
+
+    // Open first available gamepad
+    int num_joysticks = 0;
+    SDL_JoystickID* joysticks = SDL_GetGamepads(&num_joysticks);
+    if (joysticks) {
+        SDL_Log("Found %d gamepad(s)", num_joysticks);
+        if (num_joysticks > 0) {
+            gamepad = SDL_OpenGamepad(joysticks[0]);
+            if (gamepad) {
+                SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gamepad));
+            }
+            else {
+                SDL_Log("Failed to open gamepad: %s", SDL_GetError());
+            }
+        }
+        SDL_free(joysticks);
+    }
+    else {
+        SDL_Log("SDL_GetGamepads failed: %s", SDL_GetError());
+    }
 
     return SDL_APP_CONTINUE;
 }
@@ -81,6 +102,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
+    if (gamepad) {
+        SDL_CloseGamepad(gamepad);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

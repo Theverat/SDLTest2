@@ -18,6 +18,11 @@ public:
         return p;
     }
 
+    DirectX::XMVECTOR getPosV() const
+    {
+        return pos;
+    }
+
     void setSpeed(DirectX::XMFLOAT3 s)
     {
         speed = DirectX::XMLoadFloat3(&s);
@@ -40,6 +45,18 @@ public:
         return color;
     }
 
+    void setAimDir(DirectX::XMFLOAT3 d)
+    {
+        aimDir = DirectX::XMLoadFloat3(&d);
+    }
+
+    DirectX::XMFLOAT3 getAimDir() const
+    {
+        DirectX::XMFLOAT3 d;
+        DirectX::XMStoreFloat3(&d, aimDir);
+        return d;
+    }
+
     void update(float dt)
     {
         using namespace DirectX;
@@ -54,9 +71,8 @@ public:
 
     void draw(SDL_Renderer* renderer) {
         using namespace DirectX;
-        // Draw with SDL3
-        // For now, just a circle
 
+        // Body
         SDL_SetRenderDrawColor(renderer,
             color.x * 255.f,
             color.y * 255.f,
@@ -64,12 +80,23 @@ public:
             color.w * 255.f);
 
         const XMFLOAT3 p = getPos();
-        SDL_FRect rect{ p.x, p.y, 20, 20 };
+        const float size = 20.f;
+        SDL_FRect rect{ p.x - size * 0.5f, p.y - size * 0.5f, size, size };
         SDL_RenderFillRect(renderer, &rect);
+
+        // Aim direction
+        SDL_RenderLine(renderer,
+            static_cast<int>(p.x),
+            static_cast<int>(p.y),
+            static_cast<int>(p.x + getAimDir().x * 30),
+            static_cast<int>(p.y + getAimDir().y * 30));
     }
 
 private:
     DirectX::XMVECTOR pos{};
     DirectX::XMVECTOR speed{};
+    DirectX::XMVECTOR aimDir{};
     DirectX::XMFLOAT4 color{};
+
+    int health{ 100 };
 };
