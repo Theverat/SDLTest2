@@ -11,7 +11,6 @@ void Scene::spawnEnemiesOnSceneEdge(int enemyCount)
 {
     assert(enemyCount > 0);
     SDL_Log("Spawning %d enemies", enemyCount);
-    std::vector<XMFLOAT2> spawnPoints;
     for (int i = 0; i < enemyCount; ++i) {
         Enemy enemy{};
         // Random point at the edge of the scene
@@ -24,10 +23,21 @@ void Scene::spawnEnemiesOnSceneEdge(int enemyCount)
             point.x = SDL_randf() > 0.5f ? bounds.w : 0.f;
             point.y = SDL_randf() * bounds.h;
         }
-        spawnPoints.push_back(point);
         enemy.setPos(toVec(point));
 
-        enemy.setColor({ SDL_randf() * 0.5f + 0.5f, 0.0f, 0.0f, 1.f });
+
+        if (i < wave.smartEnemyCount) {
+            enemy.setAIMode(Enemy::AIMode::PREDICTIVE_CHASE);
+            enemy.setColor({ 1.0f, 0.f, 0.f, 1.f });
+            enemy.setMaxSpeed(200.f);
+            enemy.setAcceleration(500.f);
+        }
+        else {
+            // Dumb enemy
+            enemy.setAIMode(Enemy::AIMode::DUMB_CHASE);
+            enemy.setColor({ 0.f, 1.f, 1.f, 1.f });
+        }
+
         enemies.push_back(enemy);
     }
 }
@@ -48,6 +58,7 @@ void Scene::restart()
 void Scene::update(float dt, float elapsed)
 {
     using namespace DirectX;
+    playerTookDamage = false;
 
     if (paused)
         return;
@@ -72,7 +83,9 @@ void Scene::update(float dt, float elapsed)
         enemy.clampPos(minPos, maxPos);
 
         if (checkCollision(enemy, player)) {
-            enemy.maybeApplyDamage(player, elapsed);
+            if (enemy.maybeApplyDamage(player, elapsed)) {
+                playerTookDamage = true;
+            }
         }
     }
 
@@ -119,6 +132,7 @@ void Scene::update(float dt, float elapsed)
             // Update wave parameters
             ++wave.counter;
             wave.enemyCount += 20;
+            wave.smartEnemyCount += 3;
             wave.spawnInterval = std::max(5.f, wave.spawnInterval * 0.9f);
         }
     }
@@ -283,5 +297,11 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
             scaledBounds.y + 30.f * uiScale,
             text);
         SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+    }
+
+    // Damage indicator
+    if (playerTookDamage) {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 100);
+        SDL_RenderFillRect(renderer, &scaledBounds);
     }
 }

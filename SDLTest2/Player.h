@@ -12,8 +12,9 @@ public:
     void maybeFire(Scene& scene, float elapsed);
 
 private:
-    static constexpr float FIRE_INTERVAL{ 0.05f };
+    static constexpr float FIRE_INTERVAL{ 0.03f };
     float lastFireTime{};
     bool firing{ false };
-};
 
+    float moveSpeed{ 400.f };
+};

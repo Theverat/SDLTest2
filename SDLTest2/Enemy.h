@@ -8,15 +8,24 @@ class Scene;
 class Enemy : public Object
 {
 public:
+    enum class AIMode {
+        DUMB_CHASE,
+        PREDICTIVE_CHASE,
+    };
+
+    void setAIMode(AIMode mode) {
+        aiMode = mode;
+    }
     void doAIBehavior(const Scene& scene, float dt, float elapsed);
 
     // Note: does not check if the objects collide!
-    void maybeApplyDamage(Object& obj, float elapsed) {
+    bool maybeApplyDamage(Object& obj, float elapsed) {
         if (elapsed - lastDamageTime < DAMAGE_INTERVAL) {
-            return;
+            return false;
         }
         obj.setHealth(obj.getHealth() - damage);
         lastDamageTime = elapsed;
+        return true;
     }
 
     void setDamage(int value) {
@@ -27,14 +36,21 @@ public:
         return damage;
     }
 
+    void setAcceleration(float value) {
+        acceleration = value;
+    }
+
+    void setMaxSpeed(float value) {
+        maxSpeed = value;
+    }
+
 private:
-    static constexpr float MAX_SPEED_F{ 100.f };
-    static constexpr DirectX::XMVECTOR MAX_SPEED{
-        MAX_SPEED_F,
-        MAX_SPEED_F,
-        MAX_SPEED_F,
-        0.f
-    };
+    void doDumbChase(const Scene& scene, float dt, float elapsed);
+    void doPredictiveChase(const Scene& scene, float dt, float elapsed);
+
+    AIMode aiMode{ AIMode::DUMB_CHASE };
+    float acceleration{ 80.f };
+    float maxSpeed{ 300.f };
 
     static constexpr float DAMAGE_INTERVAL{ 0.5f };
     int damage{ 5 };

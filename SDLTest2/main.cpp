@@ -15,6 +15,7 @@ static Scene* scene = nullptr;
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
     SDL_SetAppMetadata("SDL Test2", "1.0", "com.example.sdl-test2");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("SDL_Init failed: %s", SDL_GetError());

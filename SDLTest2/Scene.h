@@ -48,11 +48,13 @@ private:
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
     Player player{};
+    bool playerTookDamage{ false };
     bool paused{ false };
 
     struct Wave {
         int counter{ 0 };
         int enemyCount{ 20 };
+        int smartEnemyCount{ 1 };
         float lastSpawnTime{};
         float spawnInterval{ 20.f };
     } wave;

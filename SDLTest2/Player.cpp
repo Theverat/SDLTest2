@@ -8,7 +8,6 @@ using namespace DirectX;
 void Player::handleInput(const SDL_Event& event, Scene& scene)
 {
     const float STICK_DEADZONE = 0.15f;
-    const float MOVE_SPEED = 200.0f;
     const XMVECTOR MIN_DIR_LEN_SQ = toVec(STICK_DEADZONE * STICK_DEADZONE);
 
     // Handle gamepad axis motion (joysticks)
@@ -21,7 +20,7 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                setSpeed(XMVectorSetX(getSpeed(), axisValue * MOVE_SPEED));
+                setSpeed(XMVectorSetX(getSpeed(), axisValue * moveSpeed));
             }
             else
             {
@@ -32,7 +31,7 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         {
             if (SDL_fabsf(axisValue) > STICK_DEADZONE)
             {
-                setSpeed(XMVectorSetY(getSpeed(), axisValue * MOVE_SPEED));
+                setSpeed(XMVectorSetY(getSpeed(), axisValue * moveSpeed));
             }
             else
             {
