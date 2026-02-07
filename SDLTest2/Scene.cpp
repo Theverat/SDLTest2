@@ -4,47 +4,45 @@ using namespace DirectX;
 
 Scene::Scene()
 {
-    player.setPos({ bounds.w / 2.f, bounds.h / 2.f, 0.0f });
-    player.setColor({ 0.0f, 1.0f, 0.0f, 1.f });
+    restart();
 }
 
 void Scene::spawnEnemiesOnSceneEdge(int enemyCount)
 {
     assert(enemyCount > 0);
+    SDL_Log("Spawning %d enemies", enemyCount);
     std::vector<XMFLOAT2> spawnPoints;
     for (int i = 0; i < enemyCount; ++i) {
         Enemy enemy{};
         // Random point at the edge of the scene
         XMFLOAT2 point{};
-        bool tooClose = false;
-        do {
-            if (SDL_randf() > 0.5f) {
-                point.x = SDL_randf() * bounds.w;
-                point.y = SDL_randf() > 0.5f ? bounds.h : 0.f;
-            }
-            else {
-                point.x = SDL_randf() > 0.5f ? bounds.w : 0.f;
-                point.y = SDL_randf() * bounds.h;
-            }
-
-            // Check if too close to player or other spawn points
-            static const XMVECTOR MIN_DIST_SQ = toVec(100.f * 100.f);
-            tooClose = false;
-            for (const auto& spawn : spawnPoints) {
-                const XMVECTOR toSpawn = toVec(spawn) - toVec(point);
-                const XMVECTOR distSq = XMVector3LengthSq(toSpawn);
-                if (XMVector3Less(distSq, MIN_DIST_SQ)) {
-                    tooClose = true;
-                    break;
-                }
-            }
-        } while (tooClose);
+        if (SDL_randf() > 0.5f) {
+            point.x = SDL_randf() * bounds.w;
+            point.y = SDL_randf() > 0.5f ? bounds.h : 0.f;
+        }
+        else {
+            point.x = SDL_randf() > 0.5f ? bounds.w : 0.f;
+            point.y = SDL_randf() * bounds.h;
+        }
         spawnPoints.push_back(point);
         enemy.setPos(toVec(point));
 
         enemy.setColor({ SDL_randf() * 0.5f + 0.5f, 0.0f, 0.0f, 1.f });
         enemies.push_back(enemy);
     }
+}
+
+void Scene::restart()
+{
+    player = Player{};
+    player.setPos({ bounds.w / 2.f, bounds.h / 2.f, 0.0f });
+    player.setColor({ 0.0f, 1.0f, 0.0f, 1.f });
+
+    enemies.clear();
+    projectiles.clear();
+    wave = Wave{};
+    stats = Stats{};
+    paused = false;
 }
 
 void Scene::update(float dt, float elapsed)
@@ -54,10 +52,15 @@ void Scene::update(float dt, float elapsed)
     if (paused)
         return;
 
+    // Game over?
+    if (isGameOver())
+        return;
+
     // Updates
 
-    const XMVECTOR minPos = toVec(bounds.x, bounds.y);
-    const XMVECTOR maxPos = toVec(bounds.w, bounds.h);
+    const float margin = 10.f;
+    const XMVECTOR minPos = toVec(bounds.x + margin, bounds.y + margin);
+    const XMVECTOR maxPos = toVec(bounds.w - margin, bounds.h - margin);
 
     player.update(dt, elapsed);
     player.clampPos(minPos, maxPos);
@@ -86,18 +89,21 @@ void Scene::update(float dt, float elapsed)
         }
 
         // Delete if out of bounds
-        if (isOutOfBounds(proj.getPos(), minPos, maxPos))
+        if (isOutOfBounds2D(proj.getPos(), minPos, maxPos))
         {
+            proj.setColor({ 0.f, 0.f, 1.f, 1.f });
             proj.setHealth(0);
         }
     }
 
     // Delete dead objects
 
+    const size_t oldEnemyCount = enemies.size();
     enemies.erase(std::remove_if(enemies.begin(), enemies.end(),
         [](const Enemy& enemy) {
             return !enemy.isAlive();
         }), enemies.end());
+    stats.enemiesKilled += oldEnemyCount - enemies.size();
 
     projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(),
         [](const Projectile& proj) {
@@ -110,9 +116,9 @@ void Scene::update(float dt, float elapsed)
             spawnEnemiesOnSceneEdge(wave.enemyCount);
             wave.lastSpawnTime = elapsed;
 
-            // Update parameters
+            // Update wave parameters
             ++wave.counter;
-            wave.enemyCount *= 2;
+            wave.enemyCount += 20;
             wave.spawnInterval = std::max(5.f, wave.spawnInterval * 0.9f);
         }
     }
@@ -121,6 +127,8 @@ void Scene::update(float dt, float elapsed)
 void Scene::draw(SDL_Renderer* renderer, float elapsed,
     int width, int height, float uiScale)
 {
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
     // Scale size of scene and everything in it to fit the window.
     const float windowAspect = float(width) / float(height);
     const float boundsAspect = bounds.w / bounds.h;
@@ -142,7 +150,27 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
         scaledBounds.y = (float(height) - scaledBounds.h) * 0.5f;
     }
 
+    enum class Align {
+        LEFT,
+        CENTER,
+    };
+    auto drawText = [&](const char* text, float xPerc, float yPerc,
+        float scale = 1.f,
+        Align align = Align::LEFT)
+        {
+            const float textScale = uiScale * scale;
+            SDL_SetRenderScale(renderer, textScale, textScale);
+            float x = scaledBounds.x + scaledBounds.w * xPerc;
+            const float y = scaledBounds.y + scaledBounds.h * yPerc;
+            if (align == Align::CENTER)
+                x -= SDL_strlen(text) * 6.7f * scale;
+            SDL_RenderDebugText(renderer, x / textScale, y / textScale, text);
+            SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+        };
+
+
     // TODO do the same for other sprites/objects?
+    // -> use SDL_SetRenderScale()?
 
     // Draw ground
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -210,6 +238,50 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
             - SDL_strlen(waveText) * 4.f * uiScale) / textScale;
         const float textY = (scaledBounds.y + 22.f * uiScale) / textScale;
         SDL_RenderDebugText(renderer, textX, textY, waveText);
+        SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+    }
+
+    // Game over screen
+    if (isGameOver()) {
+        const float marginFac = 0.2f;
+        SDL_FRect rect{
+            scaledBounds.x + scaledBounds.w * marginFac,
+            scaledBounds.y + scaledBounds.h * marginFac,
+            scaledBounds.w * (1.f - 2.f * marginFac),
+            scaledBounds.h * (1.f - 2.f * marginFac),
+        };
+        SDL_SetRenderDrawColor(renderer, 255, 50, 50, 200);
+        SDL_RenderFillRect(renderer, &rect);
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        drawText("Game Over", 0.5f, 0.3f, 8.f, Align::CENTER);
+
+        char text[64];
+        SDL_snprintf(text, sizeof(text),
+            "Waves defeated: %d",
+            wave.counter - 1);
+        drawText(text, 0.5f, 0.45f, 4.f, Align::CENTER);
+
+        SDL_snprintf(text, sizeof(text),
+            "Enemies killed: %d",
+            stats.enemiesKilled);
+        drawText(text, 0.5f, 0.52f, 4.f, Align::CENTER);
+
+        drawText("Press A to restart", 0.5f, 0.7f, 2.f, Align::CENTER);
+    }
+
+    // Debug info
+    {
+        char text[64];
+        SDL_snprintf(text, sizeof(text),
+            "Projectiles: %d",
+            projectiles.size());
+        SDL_SetRenderScale(renderer, uiScale, uiScale);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDebugText(renderer,
+            scaledBounds.x + 20.f * uiScale,
+            scaledBounds.y + 30.f * uiScale,
+            text);
         SDL_SetRenderScale(renderer, 1.0f, 1.0f);
     }
 }

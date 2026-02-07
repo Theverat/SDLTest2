@@ -87,7 +87,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     last = now;
     return SDL_APP_CONTINUE;
-
 }
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
@@ -102,6 +101,16 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         }
         if (event->key.scancode == SDL_SCANCODE_P) {
             scene->togglePause();
+        }
+        break;
+
+    case SDL_EVENT_GAMEPAD_BUTTON_UP:
+        if (event->gbutton.button == SDL_GAMEPAD_BUTTON_START) {
+            scene->togglePause();
+        }
+        if (scene->isGameOver()
+            && event->gbutton.button == SDL_GAMEPAD_BUTTON_SOUTH) {
+            scene->restart();
         }
         break;
 

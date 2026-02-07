@@ -26,7 +26,10 @@ public:
     }
 
     void spawnEnemiesOnSceneEdge(int enemyCount);
-
+    bool isGameOver() const {
+        return player.getHealth() <= 0;
+    }
+    void restart();
     void update(float dt, float elapsed);
     void draw(SDL_Renderer* renderer, float elapsed,
         int width, int height, float uiScale);
@@ -48,10 +51,13 @@ private:
     bool paused{ false };
 
     struct Wave {
-        int counter{ 1 };
+        int counter{ 0 };
         int enemyCount{ 20 };
         float lastSpawnTime{};
         float spawnInterval{ 20.f };
-    };
-    Wave wave{};
+    } wave;
+
+    struct Stats {
+        int enemiesKilled{ 0 };
+    } stats;
 };
