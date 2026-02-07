@@ -26,6 +26,11 @@ public:
         return pos;
     }
 
+    void clampPos(DirectX::XMVECTOR min, DirectX::XMVECTOR max)
+    {
+        pos = clamp(pos, min, max);
+    }
+
     void setSpeed(DirectX::XMVECTOR s)
     {
         speed = s;
@@ -62,7 +67,8 @@ public:
         pos = XMVectorMultiplyAdd(speed, XMVectorReplicate(dt), pos);
     }
 
-    void draw(SDL_Renderer* renderer);
+    void draw(SDL_Renderer* renderer, DirectX::XMVECTOR offset,
+        DirectX::XMVECTOR scale);
 
     void setHealth(int h) {
         health = h;

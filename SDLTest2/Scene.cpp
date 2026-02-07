@@ -56,12 +56,17 @@ void Scene::update(float dt, float elapsed)
 
     // Updates
 
+    const XMVECTOR minPos = toVec(bounds.x, bounds.y);
+    const XMVECTOR maxPos = toVec(bounds.w, bounds.h);
+
     player.update(dt, elapsed);
+    player.clampPos(minPos, maxPos);
     player.maybeFire(*this, elapsed);
 
     for (auto& enemy : enemies) {
         enemy.doAIBehavior(*this, dt, elapsed);
         enemy.update(dt, elapsed);
+        enemy.clampPos(minPos, maxPos);
 
         if (checkCollision(enemy, player)) {
             enemy.maybeApplyDamage(player, elapsed);
@@ -80,14 +85,8 @@ void Scene::update(float dt, float elapsed)
             }
         }
 
-        // Check if projectile is out of bounds
-        const XMFLOAT2 pos = toFloat2(proj.getPos());
-        const float margin = 50.f;
-
-        if (pos.x < margin
-            || pos.x > bounds.w - margin
-            || pos.y < margin
-            || pos.y > bounds.h - margin)
+        // Delete if out of bounds
+        if (isOutOfBounds(proj.getPos(), minPos, maxPos))
         {
             proj.setHealth(0);
         }
@@ -149,12 +148,17 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
     SDL_RenderFillRect(renderer, &scaledBounds);
 
-    player.draw(renderer);
+    // Draw objects
+    const XMVECTOR offset = toVec(scaledBounds.x, scaledBounds.y);
+    const XMVECTOR scale = toVec(scaledBounds.w / bounds.w,
+        scaledBounds.h / bounds.h);
+
+    player.draw(renderer, offset, scale);
     for (auto& obj : enemies) {
-        obj.draw(renderer);
+        obj.draw(renderer, offset, scale);
     }
     for (auto& proj : projectiles) {
-        proj.draw(renderer);
+        proj.draw(renderer, offset, scale);
     }
 
     // Player health bar

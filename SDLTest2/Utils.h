@@ -61,3 +61,18 @@ inline DirectX::XMFLOAT4 toFloat4(const DirectX::XMVECTOR& v)
 }
 
 bool checkCollision(const Object& obj1, const Object& obj2);
+
+inline bool isOutOfBounds(DirectX::XMVECTOR pos,
+    DirectX::XMVECTOR min,
+    DirectX::XMVECTOR max)
+{
+    return DirectX::XMVector3Less(pos, min)
+        || DirectX::XMVector3Greater(pos, max);
+}
+
+inline DirectX::XMVECTOR clamp(DirectX::XMVECTOR value,
+    DirectX::XMVECTOR min,
+    DirectX::XMVECTOR max)
+{
+    return DirectX::XMVectorMax(min, DirectX::XMVectorMin(max, value));
+}
