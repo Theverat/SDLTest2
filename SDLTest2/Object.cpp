@@ -15,7 +15,8 @@ void Object::draw(SDL_Renderer* renderer)
     const XMFLOAT3 p = toFloat3(getPos());
     SDL_FRect rect{ p.x - radius * 0.5f,
                     p.y - radius * 0.5f,
-                    radius, radius };
+                    radius * 2.f,
+                    radius * 2.f };
     SDL_RenderFillRect(renderer, &rect);
 
     // Aim direction

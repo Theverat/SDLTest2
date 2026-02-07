@@ -2,6 +2,8 @@
 
 #include <DirectXMath.h>
 
+class Object;
+
 inline DirectX::XMVECTOR toVec(float x)
 {
     return DirectX::XMVectorReplicate(x);
@@ -57,3 +59,5 @@ inline DirectX::XMFLOAT4 toFloat4(const DirectX::XMVECTOR& v)
     DirectX::XMStoreFloat4(&f, v);
     return f;
 }
+
+bool checkCollision(const Object& obj1, const Object& obj2);

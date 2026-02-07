@@ -25,6 +25,8 @@ public:
         player.handleInput(event, *this);
     }
 
+    void spawnWave();
+
     void update(float dt, float elapsed);
     void draw(SDL_Renderer* renderer, float elapsed,
         int width, int height, float uiScale);

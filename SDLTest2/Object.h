@@ -1,9 +1,10 @@
 #pragma once
 
-#include <DirectXMath.h>
-#include <SDL3/SDL.h>
-
 #include "Utils.h"
+
+#include <SDL3/SDL.h>
+#include <DirectXMath.h>
+#include <algorithm>
 
 class Object
 {
@@ -71,6 +72,14 @@ public:
         return health;
     }
 
+    int getMaxHealth() const {
+        return maxHealth;
+    }
+
+    float getHealthPercent() const {
+        return float(std::max(health, 0)) / maxHealth;
+    }
+
     bool isAlive() const {
         return health > 0;
     }
@@ -91,4 +100,5 @@ private:
     float radius{ 30.f };
 
     int health{ 100 };
+    int maxHealth{ 100 };
 };

@@ -2,15 +2,32 @@
 
 Scene::Scene()
 {
-    for (int i = 0; i < 30; ++i) {
+    player.setPos({ bounds.w / 2.f, bounds.h / 2.f, 0.0f });
+    player.setColor({ 0.0f, 1.0f, 0.0f, 1.f });
+    spawnWave();
+}
+
+void Scene::spawnWave()
+{
+    const int enemyCount = 10;
+
+    for (int i = 0; i < enemyCount; ++i) {
         Enemy enemy{};
-        enemy.setPos({ SDL_randf() * bounds.w, SDL_randf() * bounds.h, 0.0f });
+        // Random point at the edge of the scene
+        float x{}, y{};
+        if (SDL_randf() > 0.5f) {
+            x = SDL_randf() * bounds.w;
+            y = SDL_randf() > 0.5f ? bounds.h : 0.f;
+        }
+        else {
+            x = SDL_randf() > 0.5f ? bounds.w : 0.f;
+            y = SDL_randf() * bounds.h;
+        }
+        enemy.setPos({ x, y, 0.0f });
+
         enemy.setColor({ SDL_randf() * 0.5f + 0.5f, 0.0f, 0.0f, 1.f });
         enemies.push_back(enemy);
     }
-
-    player.setPos({ 200.0f, 100.0f, 0.0f });
-    player.setColor({ 0.0f, 1.0f, 0.0f, 1.f });
 }
 
 void Scene::update(float dt, float elapsed)
@@ -22,9 +39,13 @@ void Scene::update(float dt, float elapsed)
     player.update(dt, elapsed);
     player.maybeFire(*this, elapsed);
 
-    for (auto& e : enemies) {
-        e.doAIBehavior(*this, dt, elapsed);
-        e.update(dt, elapsed);
+    for (auto& enemy : enemies) {
+        enemy.doAIBehavior(*this, dt, elapsed);
+        enemy.update(dt, elapsed);
+
+        if (checkCollision(enemy, player)) {
+            enemy.maybeApplyDamage(player, elapsed);
+        }
     }
 
     for (auto& proj : projectiles) {
@@ -32,17 +53,7 @@ void Scene::update(float dt, float elapsed)
 
         // Check collision, for now naively
         for (auto& enemy : enemies) {
-            const XMVECTOR toEnemy = enemy.getPos() - proj.getPos();
-            const XMVECTOR midpointDistSq = XMVector3LengthSq(toEnemy);
-            const XMVECTOR enemyRadius = toVec(enemy.getRadius());
-            const XMVECTOR projRadius = toVec(proj.getRadius());
-
-            const XMVECTOR dist = midpointDistSq
-                - enemyRadius * enemyRadius
-                - projRadius * projRadius;
-
-            if (XMVector3Less(dist, XMVectorZero())) {
-                // Collision!
+            if (checkCollision(enemy, proj)) {
                 const int health = enemy.getHealth();
                 enemy.setHealth(health - proj.getDamage());
                 proj.setHealth(0);
@@ -100,4 +111,16 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
     for (auto& proj : projectiles) {
         proj.draw(renderer);
     }
+
+    // Player health bar
+    SDL_FRect healthBar{
+        scaledBounds.x + 20.f * uiScale,
+        scaledBounds.y + 20.f * uiScale,
+        player.getHealthPercent() * 200.f * uiScale,
+        20.f * uiScale
+    };
+    SDL_Log("Health: %d, %.2f %", player.getHealth(), player.getHealthPercent());
+
+    SDL_SetRenderDrawColor(renderer, 200, 30, 30, 255);
+    SDL_RenderFillRect(renderer, &healthBar);
 }
