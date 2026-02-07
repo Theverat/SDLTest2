@@ -127,6 +127,22 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             gamepad = nullptr;
         }
         break;
+
+    case SDL_EVENT_RENDER_TARGETS_RESET:
+        SDL_Log("Render targets reset - recreating render resources");
+        break;
+
+    case SDL_EVENT_RENDER_DEVICE_RESET:
+        SDL_Log("Render device reset - recreating renderer");
+        if (renderer) {
+            SDL_DestroyRenderer(renderer);
+        }
+        renderer = SDL_CreateRenderer(window, nullptr);
+        if (!renderer) {
+            SDL_Log("Failed to recreate renderer: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+        break;
     }
 
     scene->handleInput(*event);
