@@ -176,7 +176,7 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
         // Foreground
         const float healthPercent = player.getHealthPercent();
         healthBar.w *= healthPercent;
-        SDL_SetRenderDrawColor(renderer, 30, 200, 30, 255);
+        SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
         SDL_RenderFillRect(renderer, &healthBar);
 
         // Health text
@@ -191,15 +191,18 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
             + 100.f * uiScale
             - SDL_strlen(healthText) * 4.f * uiScale)
             / textScale;
-        const float textY = (scaledBounds.y + 22.f * uiScale) / textScale;
+        const float textY = (scaledBounds.y + 24.f * uiScale) / textScale;
         SDL_RenderDebugText(renderer, textX, textY, healthText);
         SDL_SetRenderScale(renderer, 1.0f, 1.0f);
     }
 
     // Wave number
     {
-        char waveText[32];
-        SDL_snprintf(waveText, sizeof(waveText), "Wave %d", wave.number);
+        char waveText[64];
+        SDL_snprintf(waveText, sizeof(waveText),
+            "Wave %d (next in %.1f s)",
+            wave.number,
+            std::abs(elapsed - (wave.lastSpawnTime + wave.spawnInterval)));
         const float textScale = uiScale;
         SDL_SetRenderScale(renderer, textScale, textScale);
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);

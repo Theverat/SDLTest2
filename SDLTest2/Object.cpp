@@ -22,7 +22,7 @@ void Object::draw(SDL_Renderer* renderer, XMVECTOR offset, XMVECTOR scale)
     SDL_RenderFillRect(renderer, &rect);
 
     // Aim direction
-    const XMVECTOR lineLength = toVec(60.f) * scale;
+    const XMVECTOR lineLength = toVec(100.f) * scale;
 
     const XMFLOAT2 lineStart = toFloat2(screenPos);
     const XMFLOAT2 lineEnd = toFloat2(screenPos + getAimDir() * lineLength);

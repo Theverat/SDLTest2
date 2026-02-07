@@ -9,6 +9,7 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
 {
     const float STICK_DEADZONE = 0.15f;
     const float MOVE_SPEED = 200.0f;
+    const XMVECTOR MIN_DIR_LEN_SQ = toVec(STICK_DEADZONE * STICK_DEADZONE);
 
     // Handle gamepad axis motion (joysticks)
     if (event.type == SDL_EVENT_GAMEPAD_AXIS_MOTION)
@@ -41,25 +42,19 @@ void Player::handleInput(const SDL_Event& event, Scene& scene)
         // Right stick - Direction
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTX)
         {
-            if (SDL_fabsf(axisValue) > STICK_DEADZONE)
-            {
-                setAimDir(XMVectorSetX(getAimDir(), axisValue));
-            }
+            const XMVECTOR dir = XMVectorSetX(getAimDir(), axisValue);
+            if (XMVector2Greater(XMVector2LengthSq(dir), MIN_DIR_LEN_SQ))
+                setAimDir(dir);
             else
-            {
-                setAimDir(XMVectorSetX(getAimDir(), 0.0f));
-            }
+                setAimDir(XMVectorZero());
         }
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY)
         {
-            if (SDL_fabsf(axisValue) > STICK_DEADZONE)
-            {
-                setAimDir(XMVectorSetY(getAimDir(), axisValue));
-            }
+            const XMVECTOR dir = XMVectorSetY(getAimDir(), axisValue);
+            if (XMVector2Greater(XMVector2LengthSq(dir), MIN_DIR_LEN_SQ))
+                setAimDir(dir);
             else
-            {
-                setAimDir(XMVectorSetY(getAimDir(), 0.0f));
-            }
+                setAimDir(XMVectorZero());
         }
         // Right trigger - Fire
         else if (event.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)

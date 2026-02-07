@@ -53,7 +53,7 @@ public:
 
     void setAimDir(DirectX::XMVECTOR d)
     {
-        aimDir = d;
+        aimDir = DirectX::XMVector2Normalize(d);
     }
 
     DirectX::XMVECTOR getAimDir() const
