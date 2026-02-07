@@ -25,7 +25,7 @@ public:
         player.handleInput(event, *this);
     }
 
-    void spawnWave();
+    void spawnEnemiesOnSceneEdge(int enemyCount);
 
     void update(float dt, float elapsed);
     void draw(SDL_Renderer* renderer, float elapsed,
@@ -35,9 +35,23 @@ public:
         projectiles.push_back(projectile);
     }
 
+    void togglePause() {
+        SDL_Log("Toggling pause");
+        paused = !paused;
+    }
+
 private:
     SDL_FRect bounds{ 0, 0, 1920, 1080 };
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
     Player player{};
+    bool paused{ false };
+
+    struct Wave {
+        int number{ 1 };
+        int enemyCount{ 5 };
+        float lastSpawnTime{};
+        float spawnInterval{ 30.f };
+    };
+    Wave wave{};
 };
