@@ -5,6 +5,12 @@
 
 #include "Scene.h"
 
+#ifdef NDEBUG
+static constexpr SDL_WindowFlags WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
+#else
+static constexpr SDL_WindowFlags WINDOW_FLAGS = SDL_WINDOW_RESIZABLE;
+#endif
+
 static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
 static SDL_Gamepad* gamepad = nullptr;
@@ -23,7 +29,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     if (!SDL_CreateWindowAndRenderer("Hello SDL", 2200, 1200,
-        SDL_WINDOW_RESIZABLE, &window, &renderer))
+        WINDOW_FLAGS, &window, &renderer))
     {
         SDL_Log("SDL_CreateWindowAndRenderer() failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
