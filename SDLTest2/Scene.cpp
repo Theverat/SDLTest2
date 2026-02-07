@@ -111,8 +111,8 @@ void Scene::update(float dt, float elapsed)
             wave.lastSpawnTime = elapsed;
 
             // Update parameters
-            ++wave.number;
-            wave.enemyCount += 10;
+            ++wave.counter;
+            wave.enemyCount *= 2;
             wave.spawnInterval = std::max(5.f, wave.spawnInterval * 0.9f);
         }
     }
@@ -201,7 +201,7 @@ void Scene::draw(SDL_Renderer* renderer, float elapsed,
         char waveText[64];
         SDL_snprintf(waveText, sizeof(waveText),
             "Wave %d (next in %.1f s)",
-            wave.number,
+            wave.counter,
             std::abs(elapsed - (wave.lastSpawnTime + wave.spawnInterval)));
         const float textScale = uiScale;
         SDL_SetRenderScale(renderer, textScale, textScale);

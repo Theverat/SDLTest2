@@ -11,7 +11,7 @@ void Enemy::doAIBehavior(const Scene& scene, float dt, float elapsed)
     const XMVECTOR dirToPlayer = XMVector3Normalize(toPlayer);
 
     // Simple chase behavior
-    XMVECTOR accel = dirToPlayer * 50.f;
+    XMVECTOR accel = dirToPlayer * 80.f;
     XMVECTOR newSpeed = getSpeed() + accel * dt;
     // Clamp speed
     newSpeed = XMVectorMin(XMVectorMax(newSpeed, -MAX_SPEED), MAX_SPEED);

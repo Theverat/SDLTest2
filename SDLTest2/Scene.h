@@ -48,10 +48,10 @@ private:
     bool paused{ false };
 
     struct Wave {
-        int number{ 1 };
-        int enemyCount{ 5 };
+        int counter{ 1 };
+        int enemyCount{ 20 };
         float lastSpawnTime{};
-        float spawnInterval{ 30.f };
+        float spawnInterval{ 20.f };
     };
     Wave wave{};
 };

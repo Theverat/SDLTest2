@@ -37,6 +37,6 @@ private:
     };
 
     static constexpr float DAMAGE_INTERVAL{ 0.5f };
-    int damage{ 1 };
+    int damage{ 5 };
     float lastDamageTime{};
 };
