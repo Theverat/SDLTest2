@@ -104,6 +104,26 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
     case SDL_EVENT_MOUSE_MOTION:
         break;
+
+    case SDL_EVENT_GAMEPAD_ADDED:
+        if (!gamepad) {
+            gamepad = SDL_OpenGamepad(event->gdevice.which);
+            if (gamepad) {
+                SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gamepad));
+            }
+            else {
+                SDL_Log("Failed to open gamepad: %s", SDL_GetError());
+            }
+        }
+        break;
+
+    case SDL_EVENT_GAMEPAD_REMOVED:
+        if (gamepad && SDL_GetGamepadID(gamepad) == event->gdevice.which) {
+            SDL_Log("Gamepad disconnected: %s", SDL_GetGamepadName(gamepad));
+            SDL_CloseGamepad(gamepad);
+            gamepad = nullptr;
+        }
+        break;
     }
 
     scene->handleInput(*event);
