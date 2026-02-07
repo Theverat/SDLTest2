@@ -58,6 +58,6 @@ private:
     } wave;
 
     struct Stats {
-        int enemiesKilled{ 0 };
+        size_t enemiesKilled{ 0 };
     } stats;
 };
